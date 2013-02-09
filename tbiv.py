@@ -13,14 +13,16 @@ class MainWindow(QtGui.QFrame):
         self.ok_exts = ('.jpg', '.png')
 
         layout = QtGui.QHBoxLayout(self)
-        self.img_list = QtGui.QListWidget()
-        self.img_list.setViewMode(QtGui.QListWidget.IconMode)
-        self.img_list.setMovement(QtGui.QListWidget.Static)
+        lw = QtGui.QListWidget
+        self.img_list = lw()
+        self.img_list.setViewMode(lw.IconMode)
+        self.img_list.setMovement(lw.Static)
         self.img_list.setUniformItemSizes(True)
         self.img_list.setBatchSize(10)
-        self.img_list.setLayoutMode(QtGui.QListWidget.Batched)
+        self.img_list.setLayoutMode(lw.Batched)
+        self.img_list.setSelectionMode(lw.ExtendedSelection)
         self.img_list.setIconSize(QtCore.QSize(*self.thumb_size))
-        self.img_list.setResizeMode(QtGui.QListWidget.Adjust)
+        self.img_list.setResizeMode(lw.Adjust)
         path = r'.'
         self.show_directory(self.img_list, path)
         layout.addWidget(self.img_list)
