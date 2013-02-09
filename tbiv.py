@@ -9,6 +9,8 @@ class MainWindow(QtGui.QFrame):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('TBIV')
+        self.thumb_size = (100, 100)
+        self.ok_exts = ('.jpg', '.png')
 
         layout = QtGui.QHBoxLayout(self)
         self.img_list = QtGui.QListWidget()
@@ -17,7 +19,7 @@ class MainWindow(QtGui.QFrame):
         self.img_list.setUniformItemSizes(True)
         self.img_list.setBatchSize(10)
         self.img_list.setLayoutMode(QtGui.QListWidget.Batched)
-        self.img_list.setIconSize(QtCore.QSize(100,100))
+        self.img_list.setIconSize(QtCore.QSize(*self.thumb_size))
         self.img_list.setResizeMode(QtGui.QListWidget.Adjust)
         path = r'.'
         self.show_directory(self.img_list, path)
@@ -27,11 +29,11 @@ class MainWindow(QtGui.QFrame):
 
     def show_directory(self, list_widget, path):
         tpool = QtCore.QThreadPool.globalInstance()
-        tempimg = QtGui.QPixmap(100, 100)
+        tempimg = QtGui.QPixmap(*self.thumb_size)
         tempimg.fill()
-        for n,f in enumerate([f for f in os.listdir(path) if f.lower().endswith('.jpg')]):
+        for n,f in enumerate([f for f in os.listdir(path) if f[-4:] in self.ok_exts]):
             fpath = os.path.join(path, f)
-            x = ImageLoader(fpath, n)
+            x = ImageLoader(fpath, n, self.thumb_size)
             x.shout.image_loaded.connect(self.update_image)
             list_widget.addItem(QtGui.QListWidgetItem(QtGui.QIcon(tempimg), f))
             tpool.start(x)
@@ -45,10 +47,11 @@ class MainWindow(QtGui.QFrame):
 class ImageLoader(QtCore.QRunnable):
     class ShoutMan(QtCore.QObject):
         image_loaded = QtCore.pyqtSignal(QtGui.QImage, int)
-    def __init__(self, path, row):
+    def __init__(self, path, row, thumb_size):
         super().__init__()
         self.path = path
         self.row = row
+        self.w, self.h = thumb_size
         self.shout = self.ShoutMan()
 
     def run(self):
@@ -56,7 +59,7 @@ class ImageLoader(QtCore.QRunnable):
         if img.isNull():
             print(self.path, 'wasnt\'t loaded')
         else:
-            img = img.scaled(100*2, 100*2, QtCore.Qt.KeepAspectRatio)
+            img = img.scaled(self.w*2, self.h*2, QtCore.Qt.KeepAspectRatio)
             img = img.scaled(img.width()/2, img.height()/2,
                             QtCore.Qt.IgnoreAspectRatio,
                             QtCore.Qt.SmoothTransformation)
