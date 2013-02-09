@@ -27,7 +27,17 @@ class MainWindow(QtGui.QFrame):
         self.show()
         self.resize(1024,768)
 
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+O"), self, self.open_directory)
+
+    def open_directory(self):
+        dialog = QtGui.QFileDialog()
+        dialog.setFileMode(QtGui.QFileDialog.Directory)
+        dialog.setOption(QtGui.QFileDialog.ShowDirsOnly)
+        if dialog.exec_():
+            self.show_directory(self.img_list, dialog.selectedFiles()[0])
+
     def show_directory(self, list_widget, path):
+        list_widget.clear()
         tpool = QtCore.QThreadPool.globalInstance()
         tempimg = QtGui.QPixmap(*self.thumb_size)
         tempimg.fill()
